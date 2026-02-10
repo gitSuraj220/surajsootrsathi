@@ -60,6 +60,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
+          className="flex flex-col items-center gap-4"
         >
           <Button
             onClick={scrollToForm}
@@ -73,7 +74,6 @@ const HeroSection = () => {
             href="https://forms.gle/RnL9wqmiguTQJrTE8"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-block"
           >
             <Button
               variant="outline"

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.png";
 
 const HeroSection = () => {
   const scrollToForm = () => {
@@ -17,11 +18,25 @@ const HeroSection = () => {
 
       {/* Content */}
       <div className="relative container mx-auto px-4 py-20 text-center">
+        {/* Logo */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <img
+            src={logo}
+            alt="द सूत्र लोगो"
+            className="w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full shadow-lg shadow-accent/30 ring-2 ring-accent/20"
+          />
+        </motion.div>
+
         {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/30 bg-accent/10 text-accent mb-8"
         >
           <Shield className="w-4 h-4" />

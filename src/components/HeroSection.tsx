@@ -69,6 +69,21 @@ const HeroSection = () => {
             बदलाव के वाहक बनें - रजिस्ट्रेशन करें
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>
+          <a
+            href="https://forms.gle/RnL9wqmiguTQJrTE8"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-block"
+          >
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-accent/50 text-accent hover:bg-accent/10 font-bold text-lg px-8 py-6 rounded-lg font-hindi"
+            >
+              अपना स्टोरी प्लान सबमिट करें
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </a>
         </motion.div>
 
         {/* Trust indicators */}

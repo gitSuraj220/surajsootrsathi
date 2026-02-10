@@ -16,12 +16,12 @@ import { toast } from "sonner";
 
 const categories = [
   { id: "corruption", label: "भ्रष्टाचार" },
-  { id: "crime", label: "अपराध एक्सपोज" },
+  { id: "crime", label: "अपराध/एक्सपोज" },
   { id: "humanrights", label: "मानवाधिकार" },
   { id: "environment", label: "पर्यावरण/स्वास्थ्य" },
   { id: "watchdog", label: "वॉचडॉग रिपोर्टिंग" },
   { id: "data", label: "डेटा स्टोरीज" },
-  { id: "other", label: "अन्य" },
+  { id: "other", label: "All" },
 ];
 
 const RegistrationForm = () => {

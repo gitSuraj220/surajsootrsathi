@@ -6,14 +6,24 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function base64url(input: string | ArrayBuffer): string {
+  let b64: string;
+  if (typeof input === "string") {
+    b64 = btoa(input);
+  } else {
+    b64 = btoa(String.fromCharCode(...new Uint8Array(input)));
+  }
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 async function getAccessToken(serviceAccount: {
   client_email: string;
   private_key: string;
   token_uri: string;
 }) {
   const now = Math.floor(Date.now() / 1000);
-  const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" }));
-  const payload = btoa(
+  const header = base64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const payload = base64url(
     JSON.stringify({
       iss: serviceAccount.client_email,
       scope: "https://www.googleapis.com/auth/spreadsheets",
@@ -25,7 +35,6 @@ async function getAccessToken(serviceAccount: {
 
   const unsignedToken = `${header}.${payload}`;
 
-  // Import the private key
   const pemContent = serviceAccount.private_key
     .replace(/-----BEGIN PRIVATE KEY-----/, "")
     .replace(/-----END PRIVATE KEY-----/, "")
@@ -47,9 +56,7 @@ async function getAccessToken(serviceAccount: {
     new TextEncoder().encode(unsignedToken)
   );
 
-  const signedToken = `${unsignedToken}.${btoa(
-    String.fromCharCode(...new Uint8Array(signature))
-  )}`;
+  const signedToken = `${unsignedToken}.${base64url(signature)}`;
 
   const tokenResponse = await fetch(serviceAccount.token_uri, {
     method: "POST",
@@ -58,6 +65,10 @@ async function getAccessToken(serviceAccount: {
   });
 
   const tokenData = await tokenResponse.json();
+  if (!tokenData.access_token) {
+    console.error("Token error:", JSON.stringify(tokenData));
+    throw new Error("Failed to get access token");
+  }
   return tokenData.access_token;
 }
 
@@ -71,25 +82,7 @@ Deno.serve(async (req) => {
     const { name, experience, mobile, whatsapp, email, city, state, categories } = body;
 
     const rawJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON")!;
-    console.log("Raw JSON first 50 chars:", JSON.stringify(rawJson.substring(0, 50)));
-    console.log("Raw JSON char codes:", Array.from(rawJson.substring(0, 10)).map(c => c.charCodeAt(0)));
-    
-    // Try parsing, handle various encoding issues
-    let serviceAccount: { client_email: string; private_key: string; token_uri: string };
-    try {
-      serviceAccount = JSON.parse(rawJson);
-    } catch (e1) {
-      console.log("Direct parse failed:", e1.message);
-      try {
-        // Try trimming and removing BOM or extra chars
-        const cleaned = rawJson.trim().replace(/^\uFEFF/, '');
-        serviceAccount = JSON.parse(cleaned);
-      } catch (e2) {
-        console.log("Cleaned parse failed:", e2.message);
-        // Try double-decode
-        serviceAccount = JSON.parse(JSON.parse(rawJson));
-      }
-    }
+    const serviceAccount = JSON.parse(rawJson);
     const sheetId = Deno.env.get("GOOGLE_SHEET_ID")!;
 
     const accessToken = await getAccessToken(serviceAccount);

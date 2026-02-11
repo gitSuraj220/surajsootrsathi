@@ -70,9 +70,26 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { name, experience, mobile, whatsapp, email, city, state, categories } = body;
 
-    const serviceAccount = JSON.parse(
-      Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON")!
-    );
+    const rawJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON")!;
+    console.log("Raw JSON first 50 chars:", JSON.stringify(rawJson.substring(0, 50)));
+    console.log("Raw JSON char codes:", Array.from(rawJson.substring(0, 10)).map(c => c.charCodeAt(0)));
+    
+    // Try parsing, handle various encoding issues
+    let serviceAccount: { client_email: string; private_key: string; token_uri: string };
+    try {
+      serviceAccount = JSON.parse(rawJson);
+    } catch (e1) {
+      console.log("Direct parse failed:", e1.message);
+      try {
+        // Try trimming and removing BOM or extra chars
+        const cleaned = rawJson.trim().replace(/^\uFEFF/, '');
+        serviceAccount = JSON.parse(cleaned);
+      } catch (e2) {
+        console.log("Cleaned parse failed:", e2.message);
+        // Try double-decode
+        serviceAccount = JSON.parse(JSON.parse(rawJson));
+      }
+    }
     const sheetId = Deno.env.get("GOOGLE_SHEET_ID")!;
 
     const accessToken = await getAccessToken(serviceAccount);

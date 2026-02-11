@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const categories = [
   { id: "corruption", label: "भ्रष्टाचार" },
@@ -54,12 +55,24 @@ const RegistrationForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const { data, error } = await supabase.functions.invoke("submit-to-sheets", {
+        body: {
+          ...formData,
+          categories: selectedCategories,
+        },
+      });
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    toast.success("धन्यवाद! आपका रजिस्ट्रेशन सफल रहा।");
+      if (error) throw error;
+
+      setIsSubmitted(true);
+      toast.success("धन्यवाद! आपका रजिस्ट्रेशन सफल रहा।");
+    } catch (error: any) {
+      console.error("Submission error:", error);
+      toast.error("सबमिशन में त्रुटि हुई। कृपया पुनः प्रयास करें।");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {

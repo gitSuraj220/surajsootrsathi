@@ -67,7 +67,7 @@ const HeroSection = () => {
         >
           भ्रष्टाचार, नेता-अफसर-माफिया गठजोड़ और दबे हुए मुद्दों को उजागर करें।
           <br className="hidden md:block" />
-          <span className="text-foreground font-semibold">हम बनेंगे आपकी आवाज़।</span>
+          <span className="text-foreground font-semibold">हम बनेंगे आपकी आवाज़</span>
         </motion.p>
 
         {/* CTA Button */}

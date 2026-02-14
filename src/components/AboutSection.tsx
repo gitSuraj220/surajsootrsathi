@@ -27,7 +27,7 @@ const AboutSection = () => {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6 font-hindi">
-              <span className="text-accent">Sootr Sathi</span> हैं ?
+              <span className="text-accent">Sootr Sathi</span> हैं?
             </h2>
             
             <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">

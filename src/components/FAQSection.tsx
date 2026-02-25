@@ -5,8 +5,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
-const faqSet1 = [
+const allFaqs = [
   {
     q: "यह पैनल क्या है और इसमें कैसे भाग लूं?",
     a: "यह एक ऑनलाइन प्लेटफॉर्म है, जहां फ्रीलांस जर्नलिस्ट्स अपना स्टोरी आइडिया सबमिट कर सकते हैं। रजिस्ट्रेशन फ्री है- साइन अप करें, प्रोफाइल बनाएं और आइडिया सबमिट करें।",
@@ -47,9 +54,6 @@ const faqSet1 = [
     q: "सपोर्ट या शिकायत के लिए कहां संपर्क करें?",
     a: "support@thesootr.com पर ईमेल करें या हेल्पडेस्क चैट यूज करें। रिस्पॉन्स 24-48 घंटों में मिलेगा।",
   },
-];
-
-const faqSet2 = [
   {
     q: "इस प्लेटफॉर्म पर स्टोरी आइडिया कैसे सबमिट कर सकते हैं?",
     a: "आपको बस हमारे पैनल में लॉग इन करना होगा और एक नया स्टोरी आइडिया सबमिट करना होगा। वहां आपको आइडिया के बारे में पूरी जानकारी और आपके विचार प्रस्तुत करने होंगे।",
@@ -93,77 +97,53 @@ const faqSet2 = [
 ];
 
 const FAQSection = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <section id="faq" className="py-24 bg-background relative">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-hindi">
-            अक्सर पूछे जाने वाले <span className="text-accent">सवाल (FAQ)</span>
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            फ्रीलांस जर्नलिस्ट पैनल से जुड़े आपके सभी सवालों के जवाब
-          </p>
-        </motion.div>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger className="w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-center gap-4 cursor-pointer group"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground font-hindi group-hover:text-accent transition-colors">
+                फ्रीलांस जर्नलिस्ट पैनल <span className="text-accent">FAQ</span>
+              </h2>
+              <ChevronDown
+                className={`w-8 h-8 text-accent transition-transform duration-300 ${
+                  isOpen ? "rotate-180" : ""
+                }`}
+              />
+            </motion.div>
+          </CollapsibleTrigger>
 
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Set 1 */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Accordion type="single" collapsible className="space-y-3">
-              {faqSet1.map((faq, index) => (
-                <AccordionItem
-                  key={index}
-                  value={`set1-${index}`}
-                  className="bg-card border border-border rounded-xl px-6 overflow-hidden"
-                >
-                  <AccordionTrigger className="text-left font-hindi text-foreground hover:no-underline hover:text-accent transition-colors py-5">
-                    {faq.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
-                    {faq.a}
-                  </AccordionContent>
-                </AccordionItem>
+          <CollapsibleContent className="mt-12">
+            <div className="grid lg:grid-cols-2 gap-x-8 gap-y-3 max-w-6xl mx-auto">
+              {allFaqs.map((faq, index) => (
+                <Accordion key={index} type="single" collapsible>
+                  <AccordionItem
+                    value={`faq-${index}`}
+                    className="bg-card border border-border rounded-xl px-6 overflow-hidden"
+                  >
+                    <AccordionTrigger className="text-left font-hindi text-foreground hover:no-underline hover:text-accent transition-colors py-5 text-sm md:text-base">
+                      {faq.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
+                      {faq.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               ))}
-            </Accordion>
-          </motion.div>
-
-          {/* Set 2 */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Accordion type="single" collapsible className="space-y-3">
-              {faqSet2.map((faq, index) => (
-                <AccordionItem
-                  key={index}
-                  value={`set2-${index}`}
-                  className="bg-card border border-border rounded-xl px-6 overflow-hidden"
-                >
-                  <AccordionTrigger className="text-left font-hindi text-foreground hover:no-underline hover:text-accent transition-colors py-5">
-                    {faq.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
-                    {faq.a}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </motion.div>
-        </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </section>
   );

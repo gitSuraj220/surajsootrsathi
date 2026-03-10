@@ -160,7 +160,7 @@ const RegistrationForm = () => {
                   <SelectValue placeholder="अनुभव चुनें" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fresher">फ्रेशर</SelectItem>
+                  <SelectItem value="fresher">फ्रेशर/नॉन-जर्नलिस्ट</SelectItem>
                   <SelectItem value="less-than-5">5 वर्ष से कम</SelectItem>
                   <SelectItem value="more-than-5">5 वर्ष से ज्यादा</SelectItem>
                 </SelectContent>

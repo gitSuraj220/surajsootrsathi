@@ -192,7 +192,8 @@ const RegistrationForm = () => {
                   required
                   placeholder="10 अंक"
                   value={formData.mobile}
-                  onChange={(e) => handleInputChange("mobile", e.target.value)}
+                  onChange={(e) => handleInputChange("mobile", e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  maxLength={10}
                   className="form-input-dark h-12"
                 />
               </div>
@@ -207,8 +208,9 @@ const RegistrationForm = () => {
                   type="tel"
                   placeholder="10 अंक"
                   value={formData.whatsapp}
-                  onChange={(e) => handleInputChange("whatsapp", e.target.value)}
+                  onChange={(e) => handleInputChange("whatsapp", e.target.value.replace(/\D/g, "").slice(0, 10))}
                   disabled={whatsappSameAsMobile}
+                  maxLength={10}
                   className="form-input-dark h-12"
                 />
                 <label className="flex items-center gap-2 cursor-pointer select-none">

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,7 @@ const RegistrationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [whatsappSameAsMobile, setWhatsappSameAsMobile] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     experience: "",
@@ -39,20 +40,6 @@ const RegistrationForm = () => {
     state: "",
   });
 
-  // OTP state
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpToken, setOtpToken] = useState("");
-  const [otpValue, setOtpValue] = useState("");
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(0);
-
-  useEffect(() => {
-    if (otpTimer <= 0) return;
-    const interval = setInterval(() => setOtpTimer(t => t - 1), 1000);
-    return () => clearInterval(interval);
-  }, [otpTimer]);
-
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
     setSelectedCategories(prev =>
       checked ? [...prev, categoryId] : prev.filter(id => id !== categoryId)
@@ -60,66 +47,26 @@ const RegistrationForm = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (field === "whatsapp") {
-      setOtpSent(false);
-      setOtpVerified(false);
-      setOtpToken("");
-      setOtpValue("");
-      setOtpTimer(0);
-    }
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      if (field === "mobile" && whatsappSameAsMobile) {
+        updated.whatsapp = value;
+      }
+      return updated;
+    });
   };
 
-  const handleSendOtp = async () => {
-    if (!formData.whatsapp || !/^[6-9]\d{9}$/.test(formData.whatsapp)) {
-      toast.error("कृपया सही 10 अंक का व्हाट्सएप नंबर दर्ज करें");
-      return;
-    }
-    setOtpLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("send-otp", {
-        body: { phone: formData.whatsapp },
-      });
-      if (error) throw error;
-      setOtpToken(data.token);
-      setOtpSent(true);
-      setOtpTimer(60);
-      toast.success(`OTP ${formData.whatsapp} पर भेजा गया!`);
-    } catch (err: any) {
-      toast.error("OTP भेजने में त्रुटि। पुनः प्रयास करें।");
-    } finally {
-      setOtpLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!otpValue || otpValue.length !== 6) {
-      toast.error("6 अंक का OTP दर्ज करें");
-      return;
-    }
-    setOtpLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("verify-otp", {
-        body: { phone: formData.whatsapp, otp: otpValue, token: otpToken },
-      });
-      if (error) throw error;
-      setOtpVerified(true);
-      toast.success("व्हाट्सएप नंबर सत्यापित हो गया!");
-    } catch (err: any) {
-      toast.error("गलत OTP। पुनः प्रयास करें।");
-    } finally {
-      setOtpLoading(false);
+  const handleSameAsMobileChange = (checked: boolean) => {
+    setWhatsappSameAsMobile(checked);
+    if (checked) {
+      setFormData(prev => ({ ...prev, whatsapp: prev.mobile }));
+    } else {
+      setFormData(prev => ({ ...prev, whatsapp: "" }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (formData.whatsapp && !otpVerified) {
-      toast.error("कृपया पहले व्हाट्सएप नंबर OTP से सत्यापित करें");
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke("submit-to-sheets", {
@@ -250,48 +197,28 @@ const RegistrationForm = () => {
                 />
               </div>
 
-              {/* WhatsApp with OTP */}
+              {/* WhatsApp */}
               <div className="space-y-2">
                 <Label htmlFor="whatsapp" className="text-foreground font-medium">
                   व्हाट्सएप नंबर
-                  {otpVerified && (
-                    <span className="ml-2 text-green-400 text-xs font-normal inline-flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" /> सत्यापित
-                    </span>
-                  )}
                 </Label>
-                <div className="relative">
-                  <Input
-                    id="whatsapp"
-                    type="tel"
-                    placeholder="10 अंक"
-                    value={formData.whatsapp}
-                    onChange={(e) => handleInputChange("whatsapp", e.target.value)}
-                    className={`form-input-dark h-12 ${otpVerified ? "border-green-500 pr-10" : ""}`}
-                    disabled={otpVerified}
+                <Input
+                  id="whatsapp"
+                  type="tel"
+                  placeholder="10 अंक"
+                  value={formData.whatsapp}
+                  onChange={(e) => handleInputChange("whatsapp", e.target.value)}
+                  disabled={whatsappSameAsMobile}
+                  className="form-input-dark h-12"
+                />
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <Checkbox
+                    checked={whatsappSameAsMobile}
+                    onCheckedChange={(checked) => handleSameAsMobileChange(checked as boolean)}
+                    className="border-muted-foreground data-[state=checked]:bg-accent data-[state=checked]:border-accent"
                   />
-                  {otpVerified && (
-                    <ShieldCheck className="absolute right-3 top-3.5 w-5 h-5 text-green-400" />
-                  )}
-                </div>
-                {formData.whatsapp.length === 10 && !otpVerified && (
-                  <Button
-                    type="button"
-                    onClick={handleSendOtp}
-                    disabled={otpLoading || otpTimer > 0}
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs h-8 border-accent/50 text-accent hover:bg-accent/10"
-                  >
-                    {otpLoading
-                      ? "भेज रहे हैं..."
-                      : otpTimer > 0
-                      ? `पुनः भेजें (${otpTimer}s)`
-                      : otpSent
-                      ? "OTP पुनः भेजें"
-                      : "OTP भेजें"}
-                  </Button>
-                )}
+                  <span className="text-xs text-muted-foreground">मोबाइल नंबर जैसा ही है</span>
+                </label>
               </div>
 
               <div className="space-y-2">
@@ -309,43 +236,6 @@ const RegistrationForm = () => {
                 />
               </div>
             </div>
-
-            {/* OTP Input Row */}
-            {otpSent && !otpVerified && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-2"
-              >
-                <Label className="text-foreground font-medium">OTP दर्ज करें</Label>
-                <div className="flex gap-3">
-                  <Input
-                    type="tel"
-                    placeholder="6 अंक का OTP"
-                    value={otpValue}
-                    onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    maxLength={6}
-                    className="form-input-dark h-12 text-center text-xl tracking-[0.5em]"
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleVerifyOtp}
-                    disabled={otpLoading || otpValue.length !== 6}
-                    className="h-12 bg-accent hover:bg-accent/90 text-accent-foreground px-6 shrink-0"
-                  >
-                    {otpLoading ? (
-                      <div className="w-4 h-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full animate-spin" />
-                    ) : (
-                      "सत्यापित करें"
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  OTP {formData.whatsapp} पर SMS द्वारा भेजा गया है।
-                  {otpTimer > 0 && ` ${otpTimer} सेकंड बाद पुनः भेज सकते हैं।`}
-                </p>
-              </motion.div>
-            )}
 
             {/* Location */}
             <div className="grid md:grid-cols-2 gap-4">
@@ -408,11 +298,7 @@ const RegistrationForm = () => {
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={
-                isSubmitting ||
-                selectedCategories.length === 0 ||
-                (!!formData.whatsapp && !otpVerified)
-              }
+              disabled={isSubmitting || selectedCategories.length === 0}
               className="w-full h-14 bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg mt-4 glow-red"
             >
               {isSubmitting ? (
@@ -427,12 +313,6 @@ const RegistrationForm = () => {
                 </span>
               )}
             </Button>
-
-            {!!formData.whatsapp && !otpVerified && (
-              <p className="text-center text-xs text-muted-foreground -mt-3">
-                सबमिट करने से पहले व्हाट्सएप नंबर OTP से सत्यापित करें
-              </p>
-            )}
           </div>
         </motion.form>
       </div>

@@ -1,9 +1,0 @@
-node_modules/
-src/
-supabase/
-public/
-.claude/
-*.json
-*.ts
-*.md
-bun.lock
